@@ -3,7 +3,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 // Supabase konfiguratsiyasi: .env (build vaqtida) yoki Sozlamalar sahifasida kiritilgan
 // (localStorage). Faqat URL va OCHIQ anon kalit — maxfiy kalitlar hech qachon frontendga tushmaydi.
 
-const LS_KEY = 'md_supabase_config';
+const LS_KEY = 'gs_supabase_config';
 
 export interface SupabaseConfig {
   url: string;

@@ -171,7 +171,8 @@ const useToasts = create<{ items: ToastItem[]; push: (k: ToastKind, t: string) =
   items: [],
   push: (kind, text) => {
     const id = Date.now() + Math.random();
-    set((s) => ({ items: [...s.items, { id, kind, text }] }));
+    // bir xil xabar takrorlanmasin — eskisini yangisi bilan almashtiramiz
+    set((s) => ({ items: [...s.items.filter((i) => i.text !== text), { id, kind, text }] }));
     setTimeout(() => set((s) => ({ items: s.items.filter((i) => i.id !== id) })), 3800);
   },
   drop: (id) => set((s) => ({ items: s.items.filter((i) => i.id !== id) }))

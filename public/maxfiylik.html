@@ -31,10 +31,10 @@
 <header>
   <div class="brand"><span class="mark">G</span> G.S.Style</div>
   <h1>Maxfiylik siyosati</h1>
-  <p class="muted">Kuchga kirgan sana: 2026-yil 15-noyabr · Ilova: G.S.Style (Android, <code>uz.gsstyle.app</code>)</p>
+  <p class="muted">Kuchga kirgan sana: 2026-yil 16-noyabr · Ilova: G.S.Style (Android, <code>uz.gsstyle.app</code>)</p>
 </header>
 <p>G.S.Style — kiyimlaringiz, obrazlaringiz va kunlik kiyinish tavsiyalari uchun shaxsiy garderob ilovasi. Bu siyosat ilova qanday ma’lumot yig‘ishi va saqlashini tushuntiradi.</p>
-<div class="note">Qisqacha: kiyim rasmlari va ma’lumotlaringiz avvalo <b>faqat telefoningizda</b> saqlanadi. Rasmlarni qayta ishlash (kesish, fonni olib tashlash, rangni aniqlash) <b>telefonning o‘zida</b> bajariladi. Hisob ochsangizgina ular sizning shaxsiy, yopiq hisobingizga sinxronlanadi. Reklama yo‘q, ma’lumotlar sotilmaydi.</div>
+<div class="note">Qisqacha: kiyim rasmlari va ma’lumotlaringiz avvalo <b>faqat telefoningizda</b> saqlanadi. Rasmlarni qayta ishlash (kesish, fonni olib tashlash, rangni aniqlash) <b>telefonning o‘zida</b> bajariladi. Ixtiyoriy AI stilistdan foydalansangiz, savolingiz va garderob ro‘yxati Google Gemini’ga yuboriladi (4-bo‘lim). Hisob ochsangizgina ular sizning shaxsiy, yopiq hisobingizga sinxronlanadi. Reklama yo‘q, ma’lumotlar sotilmaydi.</div>
 <h2>1. Qanday ma’lumotlar</h2>
 <table>
 <tr><th>Ma’lumot</th><th>Nima uchun</th><th>Qayerda</th></tr>
@@ -48,21 +48,25 @@
 <p>Fonni olib tashlash Google ML Kit modeli yordamida telefonning o‘zida bajariladi (model birinchi marta Google Play xizmatlari orqali yuklab olinadi). Rasm bu jarayon uchun hech qayerga yuborilmaydi. Rangni aniqlash ham telefonda, oddiy hisob-kitob bilan bajariladi.</p>
 <h2>3. Ob-havo</h2>
 <p>Ob-havo ma’lumoti Open-Meteo xizmatidan olinadi. So‘rovda faqat tanlangan shaharning koordinatasi yuboriladi, siz haqingizda hech qanday ma’lumot yuborilmaydi.</p>
-<h2>4. Sinxronlash va saqlash</h2>
+<h2 id="ai">4. AI stilist (ixtiyoriy, 18+)</h2>
+<p>“Stilist” bo‘limidan foydalansangiz (faqat rozilik bergandan keyin va hisobga kirgan holda), so‘rov bizning serverimiz orqali <b>Google Gemini API</b> xizmatiga yuboriladi. Yuboriladi: savolingiz va suhbat tarixi; garderobingizdagi kiyimlar ro‘yxati (nomi, bo‘limi, turi, rangi, mavsumi, necha marta va qachon kiyilgani); tanlangan shahar ob-havosi; profildagi jins, yosh, bo‘y va vazn (agar kiritilgan bo‘lsa); “Obrazga baho”da — siz tanlagan bitta rasm. Yuborilmaydi: ismingiz, e-pochtangiz, kiyim rasmlari.</p>
+<p>Ilova Gemini API’ning bepul tarifidan foydalanadi. Google shartlariga ko‘ra, bepul tarifda yuborilgan ma’lumotlar va javoblar Google mahsulotlarini yaxshilash uchun ishlatilishi va Google xodimlari tomonidan ko‘rib chiqilishi mumkin (ma’lumotlar Google hisobi va kalitdan ajratilgan holda). Shuning uchun shaxsiy yoki maxfiy ma’lumot yubormang va baho uchun yuzingiz ko‘rinmaydigan rasm tanlang. Batafsil: <a href="https://ai.google.dev/gemini-api/terms">Gemini API shartlari</a>, <a href="https://policies.google.com/privacy">Google maxfiylik siyosati</a>.</p>
+<p>Rasm ilovada va bizning serverimizda saqlanmaydi. Suhbat tarixi faqat telefoningizda saqlanadi va “Suhbatni tozalash” bilan o‘chiriladi. Serverda faqat kunlik so‘rovlar soni (limit uchun) saqlanadi. AI stilist 18 yoshdan kichiklar uchun mo‘ljallanmagan.</p>
+<h2>5. Sinxronlash va saqlash</h2>
 <p>Hisob ochsangiz, ma’lumotlar va rasmlar Supabase xizmatida (server: Singapur) saqlanadi. Har bir yozuv va rasm faqat sizning hisobingizga ochiq (Row Level Security va yopiq rasm ombori). Uzatish HTTPS orqali shifrlanadi.</p>
-<h2>5. Ulashish</h2>
-<p>Ma’lumotlaringiz sotilmaydi va reklama maqsadida hech kimga berilmaydi. Ular faqat yuqoridagi xizmat ko‘rsatuvchilar orqali, ilova ishlashi uchungina qayta ishlanadi.</p>
-<h2 id="ochirish">6. O‘chirish</h2>
+<h2>6. Ulashish</h2>
+<p>Ma’lumotlaringiz sotilmaydi va reklama maqsadida hech kimga berilmaydi. Ular faqat yuqoridagi xizmat ko‘rsatuvchilar (Supabase, Open-Meteo, AI stilistdan foydalansangiz — Google Gemini) orqali, ilova ishlashi uchungina qayta ishlanadi.</p>
+<h2 id="ochirish">7. O‘chirish</h2>
 <ul>
 <li><b>Ilova ichida:</b> Profil → Hisob va sinxronlash → <b>“Hisobni o‘chirish”</b> — hisob, barcha kiyimlar, obrazlar va rasmlar serverdan darhol o‘chiriladi.</li>
 <li><b>Faqat telefondagi ma’lumot:</b> Profil → Zaxira nusxa → “Shu qurilmadagi ma’lumotlarni tozalash”, yoki ilovani o‘chirish.</li>
 <li><b>Ilovaga kira olmasangiz:</b> hisobingiz emailidan <a href="mailto:Abdusalomovdurbek3@gmail.com">Abdusalomovdurbek3@gmail.com</a> manziliga yozing — 30 kun ichida o‘chiriladi.</li>
 </ul>
-<h2>7. Eksport</h2>
+<h2>8. Eksport</h2>
 <p>Profil → Zaxira nusxa orqali barcha ma’lumotlar va rasmlarni faylga yuklab olishingiz mumkin.</p>
-<h2>8. Bolalar</h2>
-<p>Ilova 13 yoshdan kichiklarga mo‘ljallanmagan.</p>
-<h2>9. O‘zgarishlar va aloqa</h2>
+<h2>9. Bolalar</h2>
+<p>Ilova 13 yoshdan kichiklarga mo‘ljallanmagan. AI stilist bo‘limi faqat 18 yoshdan kattalar uchun.</p>
+<h2>10. O‘zgarishlar va aloqa</h2>
 <p>Siyosat o‘zgarsa, shu sahifa yangilanadi. Savollar uchun: <a href="mailto:Abdusalomovdurbek3@gmail.com">Abdusalomovdurbek3@gmail.com</a></p>
 </main>
 </body>

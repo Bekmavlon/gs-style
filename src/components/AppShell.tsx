@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { BarChart3, Cloud, CloudOff, HardDrive, Layers, Loader2, Plus, Shirt, Sun, UserRound, AlertTriangle } from 'lucide-react';
+import { BarChart3, Cloud, CloudOff, HardDrive, Layers, Loader2, Plus, Shirt, Sparkles, Sun, UserRound, AlertTriangle } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useSync } from '@/lib/sync';
@@ -8,9 +8,12 @@ import { UpdatePrompt } from '@/features/UpdatePrompt';
 const NAV = [
   { to: '/', label: 'Garderob', icon: Shirt },
   { to: '/bugun', label: 'Bugun', icon: Sun },
+  { to: '/stilist', label: 'Stilist', icon: Sparkles },
   { to: '/obrazlar', label: 'Obrazlar', icon: Layers },
   { to: '/statistika', label: 'Statistika', icon: BarChart3 }
 ];
+// Mobil pastki menyu: 4 ta bo'lim + markazda "qo'shish". Statistika — sarlavhadagi tugmada.
+const MOBILE = NAV.slice(0, 4);
 
 function SyncDot() {
   const { status, pending } = useSync();
@@ -66,6 +69,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Logo />
               <div className="flex items-center gap-1">
                 <SyncDot />
+                <NavLink to="/statistika" aria-label="Statistika" className={({ isActive }) => clsx('rounded-full p-1.5', isActive ? 'text-accent' : 'text-fg')}>
+                  <BarChart3 className="h-5 w-5" />
+                </NavLink>
                 <NavLink to="/profil" aria-label="Profil" className={({ isActive }) => clsx('rounded-full p-1.5', isActive ? 'text-accent' : 'text-fg')}>
                   <UserRound className="h-5 w-5" />
                 </NavLink>
@@ -78,7 +84,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {!immersive && (
         <nav className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 backdrop-blur lg:hidden" aria-label="Asosiy menyu">
           <div className="grid grid-cols-5 items-end">
-            {NAV.slice(0, 2).map((n) => (
+            {MOBILE.slice(0, 2).map((n) => (
               <Tab key={n.to} {...n} />
             ))}
             <div className="flex justify-center">
@@ -86,7 +92,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Plus className="h-6 w-6" />
               </Link>
             </div>
-            {NAV.slice(2).map((n) => (
+            {MOBILE.slice(2).map((n) => (
               <Tab key={n.to} {...n} />
             ))}
           </div>

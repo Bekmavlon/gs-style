@@ -11,7 +11,7 @@ async function as<T>(uid: string | null, fn: () => Promise<T>) {
   await pg.exec(`set role ${uid ? 'authenticated' : 'anon'}; select set_config('request.jwt.claim.sub', '${uid ?? ''}', false);`);
   try { return await fn(); } finally { await pg.exec('reset role;'); }
 }
-const SQL = () => readFileSync(resolve(__dirname, '../supabase/migrations/20261115000000_init.sql'), 'utf8');
+const SQL = () => ['20261115000000_init.sql', '20261116000000_ai.sql'].map((f) => readFileSync(resolve(__dirname, '../supabase/migrations', f), 'utf8')).join('\n');
 
 beforeAll(async () => {
   pg = new PGlite();
@@ -68,6 +68,19 @@ describe('G.S.Style migratsiyasi', () => {
     await as(A, () => pg.exec(`insert into public.wear_logs (id, user_id, date) values (gen_random_uuid(), '${A}', '2026-11-15')`));
     await expect(as(A, () => pg.exec(`insert into public.wear_logs (id, user_id, date) values (gen_random_uuid(), '${A}', '2026-11-15')`))).rejects.toThrow(/unique|duplicate/);
     await expect(as(A, () => pg.exec(`insert into public.items (id, user_id, name, category) values (gen_random_uuid(), '${A}', 'x', 'nomalum')`))).rejects.toThrow(/check/);
+  });
+  it('AI kunlik limiti: limitgacha ruxsat, keyin rad; qaytarish ishlaydi; jadval yopiq', async () => {
+    const take = (uid: string, lim = 3) => as(uid, () => pg.query<{ r: { ok: boolean; used: number } }>(`select public.ai_take_quota(${lim}) r`)).then((x) => x.rows[0].r);
+    expect(await take(A)).toMatchObject({ ok: true, used: 1 });
+    await take(A);
+    expect(await take(A)).toMatchObject({ ok: true, used: 3 });
+    expect(await take(A)).toMatchObject({ ok: false });
+    expect(await take(B)).toMatchObject({ ok: true, used: 1 });
+    await as(A, () => pg.exec(`select public.ai_refund()`));
+    expect(await take(A)).toMatchObject({ ok: true, used: 3 });
+    await expect(as(A, () => pg.query(`select * from public.ai_usage`))).rejects.toThrow(/permission denied/);
+    await expect(as(A, () => pg.exec(`update public.ai_usage set count = 0`))).rejects.toThrow(/permission denied/);
+    await expect(as(null, () => pg.query(`select public.ai_take_quota(3)`))).rejects.toThrow(/permission denied/);
   });
   it('anon hech narsa ko‘rmaydi; hisobni faqat o‘zi o‘chiradi', async () => {
     await expect(as(null, () => pg.query(`select * from public.items`))).rejects.toThrow(/permission denied/);

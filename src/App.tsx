@@ -14,6 +14,7 @@ const Today = lazy(() => import('@/pages/Today'));
 const Outfits = lazy(() => import('@/pages/Outfits'));
 const Stats = lazy(() => import('@/pages/Stats'));
 const Profile = lazy(() => import('@/pages/Profile'));
+const Stylist = lazy(() => import('@/pages/Stylist'));
 
 function ThemeApplier() {
   const s = useSettings();
@@ -51,6 +52,7 @@ export default function App() {
               <Route path="/qoshish" element={<AddItem />} />
               <Route path="/kiyim/:id" element={<ItemDetail />} />
               <Route path="/bugun" element={<Today />} />
+              <Route path="/stilist" element={<Stylist />} />
               <Route path="/obrazlar" element={<Outfits />} />
               <Route path="/statistika" element={<Stats />} />
               <Route path="/profil" element={<Profile />} />

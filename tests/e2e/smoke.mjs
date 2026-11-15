@@ -11,6 +11,18 @@ const step = async (name, fn) => { try { await fn(); results.push(['OK', name]);
 const b = await puppeteer.launch({ executablePath: '/usr/bin/google-chrome', headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
 const p = await b.newPage();
 p.on('pageerror', (e) => errors.push(e.message));
+// AI serverining o'rnini bosuvchi soxta javob beruvchi (haqiqiy Gemini chaqirilmaydi)
+await p.evaluateOnNewDocument(() => {
+  window.__aiCalls = [];
+  window.__GS_AI_MOCK__ = async (mode, body) => {
+    window.__aiCalls.push({ mode, n: body.context.wardrobe.length, hasImage: !!body.image, last: body.messages?.at(-1)?.text });
+    await new Promise((r) => setTimeout(r, 300));
+    const keys = body.context.wardrobe.map((w) => w.k);
+    if (mode === 'chat') return { result: { reply: 'Ish uchun sviter, jinsi va botinka mos tushadi.', outfits: [{ title: 'Ishga kuzgi obraz', items: [keys[0], keys[1], keys[2], 'k99'], why: 'Salqin kunga iliq va qulay.' }] }, quota: { used: 1, limit: 15 } };
+    if (mode === 'rate') return { result: { score: 7, summary: 'Ranglar yaxshi uyg‘unlashgan.', good: ['Rang uyg‘unligi'], improve: ['Kamar qo‘shing'], swap: [{ items: [keys[1]], why: 'Jinsi bilan sinab ko‘ring' }] }, quota: { used: 2, limit: 15 } };
+    return { result: { summary: 'Garderob asosan kundalik.', missing: [{ name: 'Oq klassik ko‘ylak', category: 'ustki', why: 'Ish uchun', priority: 1 }], underused: [{ items: [keys[0]], tip: 'Kurtka bilan kiying' }] }, quota: { used: 3, limit: 15 } };
+  };
+});
 await p.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 const go = async (h) => { await p.goto(BASE + '#' + h, { waitUntil: 'networkidle0' }); await sleep(600); };
 const text = () => p.evaluate(() => document.body.innerText);
@@ -111,6 +123,38 @@ await step('Statistika', async () => {
   const t = await text();
   if (!t.includes('Eng ko‘p kiyilganlar') || !t.includes('Jigarrang sviter')) throw new Error('statistika yo‘q');
   await shot('08-statistika');
+});
+
+await step('Stilist: rozilik (18+), suhbat, obrazga baho, xarid', async () => {
+  await go('/stilist');
+  if (!(await text()).includes('AI stilist qanday ishlaydi')) throw new Error('rozilik oynasi yo‘q');
+  const disabled = await p.evaluate(() => [...document.querySelectorAll('button')].find((b) => b.innerText.includes('Tushundim, roziman')).disabled);
+  if (!disabled) throw new Error('18+ belgilanmasdan rozilik tugmasi faol');
+  await p.click('input[type=checkbox]');
+  await click('Tushundim, roziman');
+  await click('Ertaga ishga nima kiyay?');
+  await p.waitForFunction(() => document.body.innerText.includes('Ishga kuzgi obraz'), { timeout: 5000 });
+  const t = await text();
+  if (!t.includes('Ish uchun sviter') || !t.includes('bugun yana 14 ta so‘rov')) throw new Error('javob/limit ko‘rinmadi');
+  const calls = await p.evaluate(() => window.__aiCalls);
+  if (calls[0].n !== 5 || calls[0].last !== 'Ertaga ishga nima kiyay?') throw new Error('kontekst noto‘g‘ri: ' + JSON.stringify(calls[0]));
+  await click('Saqlash');
+  await shot('10-stilist-suhbat');
+  await click('Obrazga baho');
+  const f = await p.$('input[data-testid=rate-file]');
+  await f.uploadFile(`${IMGS}/1-sviter.jpg`);
+  await p.waitForFunction(() => [...document.querySelectorAll('button')].some((b) => b.innerText.includes('Baholash')), { timeout: 5000 });
+  await click('Baholash');
+  await p.waitForFunction(() => document.body.innerText.includes('Ranglar yaxshi uyg‘unlashgan'), { timeout: 5000 });
+  if (!(await p.evaluate(() => window.__aiCalls.at(-1).hasImage))) throw new Error('rasm yuborilmadi');
+  await shot('11-stilist-baho');
+  await click('Xarid');
+  await click('Garderobni tahlil qilish');
+  await p.waitForFunction(() => document.body.innerText.includes('Oq klassik ko‘ylak'), { timeout: 5000 });
+  await shot('12-stilist-xarid');
+  await go('/obrazlar');
+  const n = (await text()).split('Ishga kuzgi obraz').length - 1;
+  if (n !== 1) throw new Error(`AI obrazi ${n} marta saqlangan`);
 });
 
 await step('Profil: zaxira (rasmlar bilan) va qorong‘i tema', async () => {

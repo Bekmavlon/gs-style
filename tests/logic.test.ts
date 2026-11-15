@@ -152,3 +152,27 @@ describe('fon rangini chiqarib tashlash', async () => {
     expect(dominantColorIds(dropBackground(center, Array(50).fill(bg)))).toEqual(['oq']);
   });
 });
+
+describe('AI konteksti', async () => {
+  const { buildContext, mapResult } = await import('@/lib/ai');
+  const { defaultSettings } = await import('@/lib/repo');
+  const base = { created_at: '', updated_at: '', deleted_at: null, user_id: null, brand: '', size: '', price: null, purchased_on: null, notes: '', image_id: null, image_ext: null, bg_removed: false, subtype: '', occasions: [], seasons: [], warmth: 2 };
+  const items = [
+    { ...base, id: 'A', name: 'Oq futbolka', category: 'ustki', colors: ['oq'], favorite: true, archived: false },
+    { ...base, id: 'B', name: 'Eski kurtka', category: 'tashqi', colors: [], favorite: false, archived: true },
+    { ...base, id: 'C', name: 'Jinsi', category: 'pastki', colors: ['tokkok'], favorite: false, archived: false }
+  ] as never[];
+  const logs = [{ id: 'l1', date: '2026-11-10', item_ids: ['A'], outfit_id: null, note: '', created_at: '', updated_at: '', deleted_at: null, user_id: null }] as never[];
+  const fc = { city: 'toshkent', fetchedAt: '', current: null, days: [{ date: '2026-11-16', tMin: 3.6, tMax: 11.2, precipProb: 40, code: 61 }] };
+  it('arxivdagilar yuborilmaydi, qisqa kalitlar, ob-havo va statistika qo‘shiladi; ism/e-pochta yo‘q', () => {
+    const s = { ...defaultSettings('x', null), display_name: 'Durbek', gender: 'erkak' as const, age: 25 };
+    const c = buildContext({ items, logs, settings: s }, '2026-11-16', fc);
+    expect(c.context.wardrobe.map((w) => [w.k, w.n, w.worn])).toEqual([['k1', 'Oq futbolka', 1], ['k2', 'Jinsi', 0]]);
+    expect(c.context.wardrobe[0]).toMatchObject({ col: ['Oq'], fav: true, last: '2026-11-10' });
+    expect(c.context.weather).toMatchObject({ city: 'Toshkent', tMin: 4, tMax: 11, precip: 40 });
+    expect(c.context.profile).toEqual({ gender: 'erkak', age: 25, height_cm: null, weight_kg: null });
+    expect(JSON.stringify(c.context)).not.toContain('Durbek');
+    const r = mapResult('chat', { reply: 'ok', outfits: [{ title: 't', items: ['k2', 'k1', 'k9'], why: '' }, { title: 'x', items: ['k9'], why: '' }] }, c.keyToId) as { outfits: { items: string[] }[] };
+    expect(r.outfits).toEqual([{ title: 't', items: ['C', 'A'], why: '' }]);
+  });
+});
