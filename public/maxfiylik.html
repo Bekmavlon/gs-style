@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Libosim — Maxfiylik siyosati</title>
+<style>
+  :root { color-scheme: light dark; --bg:#fbfaf7; --fg:#1b1b1e; --muted:#5c5c66; --line:#e3ded4; --gold:#1e5c57; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0b0b0c; --fg:#ececee; --muted:#9a9aa3; --line:#2a2a2e; --gold:#6ebab0; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 40px 20px 64px; }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 20px; margin-bottom: 28px; }
+  .brand { display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.04em; }
+  .mark { width:32px; height:32px; border-radius:8px; background:var(--gold); color:#000; display:grid; place-items:center; font-size:13px; }
+  h1 { font-size: 28px; line-height:1.25; margin: 18px 0 6px; }
+  h2 { font-size: 19px; margin: 34px 0 8px; }
+  p, li { color: var(--fg); }
+  .muted { color: var(--muted); font-size: 14px; }
+  ul { padding-left: 22px; }
+  li { margin: 4px 0; }
+  table { width:100%; border-collapse: collapse; font-size: 15px; margin: 8px 0; }
+  th, td { text-align:left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; font-size: 13px; }
+  .note { border-left: 3px solid var(--gold); padding: 6px 14px; margin: 14px 0; }
+  a { color: var(--gold); }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="brand"><span class="mark">L</span> Libosim</div>
+  <h1>Maxfiylik siyosati</h1>
+  <p class="muted">Kuchga kirgan sana: 2026-yil 15-noyabr · Ilova: Libosim (Android, <code>uz.libosim.app</code>)</p>
+</header>
+<p>Libosim — kiyimlaringiz, obrazlaringiz va kunlik kiyinish tavsiyalari uchun shaxsiy garderob ilovasi. Bu siyosat ilova qanday ma’lumot yig‘ishi va saqlashini tushuntiradi.</p>
+<div class="note">Qisqacha: kiyim rasmlari va ma’lumotlaringiz avvalo <b>faqat telefoningizda</b> saqlanadi. Rasmlarni qayta ishlash (kesish, fonni olib tashlash, rangni aniqlash) <b>telefonning o‘zida</b> bajariladi. Hisob ochsangizgina ular sizning shaxsiy, yopiq hisobingizga sinxronlanadi. Reklama yo‘q, ma’lumotlar sotilmaydi.</div>
+<h2>1. Qanday ma’lumotlar</h2>
+<table>
+<tr><th>Ma’lumot</th><th>Nima uchun</th><th>Qayerda</th></tr>
+<tr><td>Kiyim rasmlari va tavsiflari (bo‘lim, rang, mavsum, brend, narx, izoh)</td><td>Garderobni yuritish</td><td>Telefonda; hisob ochilsa — yopiq serverda</td></tr>
+<tr><td>Obrazlar va “bugun kiydim” belgilari</td><td>Tavsiya va statistika</td><td>Telefonda; hisob ochilsa — serverda</td></tr>
+<tr><td>Profil: ism, jins, bo‘y, vazn, yosh, shahar (ixtiyoriy)</td><td>Tavsiyalarni moslash, ob-havo</td><td>Telefonda; hisob ochilsa — serverda</td></tr>
+<tr><td>Email va parol</td><td>Faqat hisob ochsangiz: kirish va sinxronlash</td><td>Server (parol shifrlangan xesh ko‘rinishida)</td></tr>
+</table>
+<p>Ilova joylashuvingizni (GPS) yig‘maydi: ob-havo uchun siz tanlagan shahar koordinatasi ishlatiladi. Kontaktlar, mikrofon, reklama identifikatorlari yig‘ilmaydi. Kamera va galereyaga faqat siz rasm tanlaganingizda kiriladi.</p>
+<h2>2. Rasmlarni qayta ishlash</h2>
+<p>Fonni olib tashlash Google ML Kit modeli yordamida telefonning o‘zida bajariladi (model birinchi marta Google Play xizmatlari orqali yuklab olinadi). Rasm bu jarayon uchun hech qayerga yuborilmaydi. Rangni aniqlash ham telefonda, oddiy hisob-kitob bilan bajariladi.</p>
+<h2>3. Ob-havo</h2>
+<p>Ob-havo ma’lumoti Open-Meteo xizmatidan olinadi. So‘rovda faqat tanlangan shaharning koordinatasi yuboriladi, siz haqingizda hech qanday ma’lumot yuborilmaydi.</p>
+<h2>4. Sinxronlash va saqlash</h2>
+<p>Hisob ochsangiz, ma’lumotlar va rasmlar Supabase xizmatida (server: Singapur) saqlanadi. Har bir yozuv va rasm faqat sizning hisobingizga ochiq (Row Level Security va yopiq rasm ombori). Uzatish HTTPS orqali shifrlanadi.</p>
+<h2>5. Ulashish</h2>
+<p>Ma’lumotlaringiz sotilmaydi va reklama maqsadida hech kimga berilmaydi. Ular faqat yuqoridagi xizmat ko‘rsatuvchilar orqali, ilova ishlashi uchungina qayta ishlanadi.</p>
+<h2 id="ochirish">6. O‘chirish</h2>
+<ul>
+<li><b>Ilova ichida:</b> Profil → Hisob va sinxronlash → <b>“Hisobni o‘chirish”</b> — hisob, barcha kiyimlar, obrazlar va rasmlar serverdan darhol o‘chiriladi.</li>
+<li><b>Faqat telefondagi ma’lumot:</b> Profil → Zaxira nusxa → “Shu qurilmadagi ma’lumotlarni tozalash”, yoki ilovani o‘chirish.</li>
+<li><b>Ilovaga kira olmasangiz:</b> hisobingiz emailidan <a href="mailto:Abdusalomovdurbek3@gmail.com">Abdusalomovdurbek3@gmail.com</a> manziliga yozing — 30 kun ichida o‘chiriladi.</li>
+</ul>
+<h2>7. Eksport</h2>
+<p>Profil → Zaxira nusxa orqali barcha ma’lumotlar va rasmlarni faylga yuklab olishingiz mumkin.</p>
+<h2>8. Bolalar</h2>
+<p>Ilova 13 yoshdan kichiklarga mo‘ljallanmagan.</p>
+<h2>9. O‘zgarishlar va aloqa</h2>
+<p>Siyosat o‘zgarsa, shu sahifa yangilanadi. Savollar uchun: <a href="mailto:Abdusalomovdurbek3@gmail.com">Abdusalomovdurbek3@gmail.com</a></p>
+</main>
+</body>
+</html>

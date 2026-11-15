@@ -1,0 +1,96 @@
+# Libosim Android APK'ni GitHub serverlarida avtomatik yig'ish.
+# Ishga tushirish: main'ga push yoki Actions → "Libosim APK" → Run workflow.
+# Natija: Releases sahifasida libosim.apk (telefondan to'g'ridan-to'g'ri yuklab olinadi).
+# Doimiy imzo (Play Market va ustidan yangilash uchun): ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD secret'lari.
+# Ular bo'lmasa — keshda saqlanadigan debug kalit ishlatiladi (sinov uchun yetarli).
+name: Libosim APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      VCODE: ${{ github.run_number }}
+      VNAME: 0.1.${{ github.run_number }}
+      HAS_KS: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' && secrets.ANDROID_KEYSTORE_PASSWORD != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Android SDK litsenziyalari
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+
+      - name: Bog'liqliklar
+        run: npm ci
+
+      - name: Testlar
+        run: npm test
+
+      - name: Veb-ilovani yig'ish
+        env:
+          VITE_APP_VERSION: ${{ env.VNAME }}
+        run: npm run build
+
+      - name: Capacitor sync
+        run: npx cap sync android
+
+      # Debug kalit har safar yangidan yaratilmasligi uchun (aks holda telefonda "paket zid" xatosi)
+      - name: Debug imzo kalitini tiklash
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: libosim-debug-keystore-v1
+
+      - name: Debug APK
+        working-directory: android
+        run: chmod +x gradlew && ./gradlew assembleDebug --no-daemon -PappVersionCode=$VCODE -PappVersionName=$VNAME
+
+      - name: Release APK + AAB (doimiy kalit bilan)
+        if: env.HAS_KS == 'true'
+        env:
+          KS: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        working-directory: android
+        run: |
+          echo "$KS" | base64 -d > release.keystore
+          ALIAS=$(keytool -list -keystore release.keystore -storepass "$KS_PASS" | grep PrivateKeyEntry | head -1 | cut -d, -f1)
+          ./gradlew assembleRelease bundleRelease --no-daemon -PappVersionCode=$VCODE -PappVersionName=$VNAME
+          BT=$ANDROID_HOME/build-tools/$(ls $ANDROID_HOME/build-tools | sort -V | tail -1)
+          $BT/zipalign -p -f 4 app/build/outputs/apk/release/app-release-unsigned.apk aligned.apk
+          $BT/apksigner sign --ks release.keystore --ks-pass env:KS_PASS --ks-key-alias "$ALIAS" --key-pass env:KS_PASS --out ../libosim.apk aligned.apk
+          cp app/build/outputs/bundle/release/app-release.aab ../libosim.aab
+          jarsigner -sigalg SHA256withRSA -digestalg SHA-256 -keystore release.keystore -storepass:env KS_PASS -keypass:env KS_PASS ../libosim.aab "$ALIAS"
+          rm -f release.keystore
+
+      - name: APK tanlash
+        run: |
+          if [ ! -f libosim.apk ]; then cp android/app/build/outputs/apk/debug/app-debug.apk libosim.apk; fi
+          ls -la libosim.*
+
+      - name: Releases sahifasiga joylash
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v0.1.${{ github.run_number }}
+          name: Libosim v0.1.${{ github.run_number }}
+          make_latest: true
+          body: |
+            Telefonga o'rnatish: **libosim.apk** → yuklab oling → oching → "Noma'lum manbalardan o'rnatish"ga ruxsat bering → O'rnatish.
+          files: |
+            libosim.apk
+            libosim.aab

@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== Libosim dizayn tokenlari ===== */
+:root {
+  --bg: 246 244 240;      /* zig'ir */
+  --surface: 255 255 255;
+  --surface2: 238 235 229;
+  --line: 226 222 214;
+  --fg: 27 27 26;
+  --muted: 112 110 104;
+  --accent: 30 92 87;     /* to'q feruza */
+  --accent-fg: 255 255 255;
+  --terra: 194 100 63;    /* terrakota — sevimlilar */
+  --ok: 46 125 79;
+  --warn: 181 121 26;
+  --bad: 190 60 52;
+  --photo: 241 238 232;   /* kiyim rasmi foni */
+  color-scheme: light;
+  --sat: max(var(--safe-area-inset-top, 0px), env(safe-area-inset-top, 0px));
+  --sab: max(var(--safe-area-inset-bottom, 0px), env(safe-area-inset-bottom, 0px));
+}
+.dark {
+  --bg: 18 19 19;
+  --surface: 27 28 28;
+  --surface2: 36 38 38;
+  --line: 48 50 50;
+  --fg: 236 234 229;
+  --muted: 156 152 145;
+  --accent: 110 186 176;
+  --accent-fg: 12 30 28;
+  --terra: 226 140 104;
+  --ok: 120 196 150;
+  --warn: 228 180 96;
+  --bad: 230 120 110;
+  --photo: 40 42 42;
+  color-scheme: dark;
+}
+
+html, body, #root { height: 100%; }
+body {
+  @apply bg-bg text-fg antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+@layer components {
+  .card { @apply rounded-2xl border border-line bg-surface p-4; }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors
+      disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50;
+  }
+  .btn-primary { @apply btn bg-accent text-accent-fg hover:bg-accent/90; }
+  .btn-ghost { @apply btn text-fg hover:bg-surface2; }
+  .btn-outline { @apply btn border border-line bg-surface text-fg hover:bg-surface2; }
+  .btn-danger { @apply btn bg-bad text-white hover:bg-bad/90; }
+  .input {
+    @apply w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-sm text-fg placeholder:text-muted/70
+      focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30;
+  }
+  .label { @apply mb-1.5 block text-xs font-medium text-muted; }
+  .chip {
+    @apply inline-flex shrink-0 items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 text-xs text-fg transition-colors;
+  }
+  .chip-on { @apply border-accent bg-accent text-accent-fg; }
+  .h-title { @apply text-[22px] font-semibold tracking-tight; }
+  .section-title { @apply text-sm font-semibold; }
+}
+
+.pb-safe { padding-bottom: var(--sab); }
+.pt-safe { padding-top: var(--sat); }
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { scrollbar-width: none; }
+.photo-bg { background: rgb(var(--photo)); }
+.checker {
+  background-color: rgb(var(--photo));
+  background-image: linear-gradient(45deg, rgb(var(--line)/.5) 25%, transparent 25%), linear-gradient(-45deg, rgb(var(--line)/.5) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgb(var(--line)/.5) 75%), linear-gradient(-45deg, transparent 75%, rgb(var(--line)/.5) 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
+input[type='range'], input[type='checkbox'] { accent-color: rgb(var(--accent)); }

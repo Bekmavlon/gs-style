@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Libosim</string>
+    <string name="title_activity_main">Libosim</string>
+    <string name="package_name">uz.libosim.app</string>
+    <string name="custom_url_scheme">uz.libosim.app</string>
+</resources>
