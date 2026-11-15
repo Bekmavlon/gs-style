@@ -2,7 +2,7 @@ import Dexie, { type Table } from 'dexie';
 import type { LocalImage, MetaItem, OutboxItem, TableMap } from './types';
 
 // Telefon/brauzerdagi baza (IndexedDB). Hamma yozuv avval shu yerga tushadi.
-export class LibosimDB extends Dexie {
+export class StyleDB extends Dexie {
   items!: Table<TableMap['items'], string>;
   outfits!: Table<TableMap['outfits'], string>;
   wear_logs!: Table<TableMap['wear_logs'], string>;
@@ -11,7 +11,7 @@ export class LibosimDB extends Dexie {
   outbox!: Table<OutboxItem, number>;
   meta!: Table<MetaItem, string>;
 
-  constructor(name = 'libosim') {
+  constructor(name = 'gsstyle') {
     super(name);
     this.version(1).stores({
       items: 'id, category, updated_at',
@@ -25,9 +25,9 @@ export class LibosimDB extends Dexie {
   }
 }
 
-export let db = new LibosimDB();
+export let db = new StyleDB();
 
-export function __setDb(next: LibosimDB) {
+export function __setDb(next: StyleDB) {
   db = next;
 }
 

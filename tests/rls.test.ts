@@ -38,7 +38,7 @@ const item = (id: string, uid: string, name: string, upd = '2026-11-15T10:00:00Z
   `insert into public.items (id, user_id, name, category, updated_at, created_at) values ('${id}', '${uid}', '${name}', 'ustki', '${upd}', '${upd}')
    on conflict (id) do update set name = excluded.name, updated_at = excluded.updated_at`;
 
-describe('Libosim migratsiyasi', () => {
+describe('G.S.Style migratsiyasi', () => {
   it('bucket yopiq holda yaratilgan', async () => {
     const r = await pg.query<{ public: boolean }>(`select public from storage.buckets where id = 'wardrobe'`);
     expect(r.rows[0].public).toBe(false);

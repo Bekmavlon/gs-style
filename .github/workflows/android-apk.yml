@@ -1,9 +1,9 @@
-# Libosim Android APK'ni GitHub serverlarida avtomatik yig'ish.
-# Ishga tushirish: main'ga push yoki Actions → "Libosim APK" → Run workflow.
-# Natija: Releases sahifasida libosim.apk (telefondan to'g'ridan-to'g'ri yuklab olinadi).
+# G.S.Style Android APK'ni GitHub serverlarida avtomatik yig'ish.
+# Ishga tushirish: main'ga push yoki Actions → "G.S.Style APK" → Run workflow.
+# Natija: Releases sahifasida gsstyle.apk (telefondan to'g'ridan-to'g'ri yuklab olinadi).
 # Doimiy imzo (Play Market va ustidan yangilash uchun): ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD secret'lari.
 # Ular bo'lmasa — keshda saqlanadigan debug kalit ishlatiladi (sinov uchun yetarli).
-name: Libosim APK
+name: G.S.Style APK
 
 on:
   workflow_dispatch:
@@ -55,7 +55,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.android/debug.keystore
-          key: libosim-debug-keystore-v1
+          key: gsstyle-debug-keystore-v1
 
       - name: Debug APK
         working-directory: android
@@ -73,24 +73,24 @@ jobs:
           ./gradlew assembleRelease bundleRelease --no-daemon -PappVersionCode=$VCODE -PappVersionName=$VNAME
           BT=$ANDROID_HOME/build-tools/$(ls $ANDROID_HOME/build-tools | sort -V | tail -1)
           $BT/zipalign -p -f 4 app/build/outputs/apk/release/app-release-unsigned.apk aligned.apk
-          $BT/apksigner sign --ks release.keystore --ks-pass env:KS_PASS --ks-key-alias "$ALIAS" --key-pass env:KS_PASS --out ../libosim.apk aligned.apk
-          cp app/build/outputs/bundle/release/app-release.aab ../libosim.aab
-          jarsigner -sigalg SHA256withRSA -digestalg SHA-256 -keystore release.keystore -storepass:env KS_PASS -keypass:env KS_PASS ../libosim.aab "$ALIAS"
+          $BT/apksigner sign --ks release.keystore --ks-pass env:KS_PASS --ks-key-alias "$ALIAS" --key-pass env:KS_PASS --out ../gsstyle.apk aligned.apk
+          cp app/build/outputs/bundle/release/app-release.aab ../gsstyle.aab
+          jarsigner -sigalg SHA256withRSA -digestalg SHA-256 -keystore release.keystore -storepass:env KS_PASS -keypass:env KS_PASS ../gsstyle.aab "$ALIAS"
           rm -f release.keystore
 
       - name: APK tanlash
         run: |
-          if [ ! -f libosim.apk ]; then cp android/app/build/outputs/apk/debug/app-debug.apk libosim.apk; fi
-          ls -la libosim.*
+          if [ ! -f gsstyle.apk ]; then cp android/app/build/outputs/apk/debug/app-debug.apk gsstyle.apk; fi
+          ls -la gsstyle.*
 
       - name: Releases sahifasiga joylash
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v0.1.${{ github.run_number }}
-          name: Libosim v0.1.${{ github.run_number }}
+          name: G.S.Style v0.1.${{ github.run_number }}
           make_latest: true
           body: |
-            Telefonga o'rnatish: **libosim.apk** → yuklab oling → oching → "Noma'lum manbalardan o'rnatish"ga ruxsat bering → O'rnatish.
+            Telefonga o'rnatish: **gsstyle.apk** → yuklab oling → oching → "Noma'lum manbalardan o'rnatish"ga ruxsat bering → O'rnatish.
           files: |
-            libosim.apk
-            libosim.aab
+            gsstyle.apk
+            gsstyle.aab

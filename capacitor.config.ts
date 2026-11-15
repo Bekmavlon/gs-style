@@ -2,8 +2,8 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 // Android ilova (APK) konfiguratsiyasi. Veb-kod `dist/` dan olinadi.
 const config: CapacitorConfig = {
-  appId: 'uz.libosim.app',
-  appName: 'Libosim',
+  appId: 'uz.gsstyle.app',
+  appName: 'G.S.Style',
   webDir: 'dist',
   android: {
     backgroundColor: '#f6f4f0'

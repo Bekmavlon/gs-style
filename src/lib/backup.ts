@@ -6,7 +6,7 @@ import { SYNC_TABLES, type BaseRecord, type TableName } from './types';
 // Zaxira: JSON (ixtiyoriy ravishda rasmlar bilan — data URL ko'rinishida)
 
 export interface BackupFile {
-  app: 'libosim';
+  app: 'gsstyle';
   format: 1;
   exported_at: string;
   tables: Partial<Record<TableName, BaseRecord[]>>;
@@ -23,7 +23,7 @@ async function toDataUrl(b: Blob): Promise<string> {
 export async function exportAll(withImages = true): Promise<BackupFile> {
   const tables: Partial<Record<TableName, BaseRecord[]>> = {};
   for (const t of SYNC_TABLES) tables[t] = ((await db.table(t).toArray()) as BaseRecord[]).filter((r) => !r.deleted_at);
-  const out: BackupFile = { app: 'libosim', format: 1, exported_at: new Date().toISOString(), tables };
+  const out: BackupFile = { app: 'gsstyle', format: 1, exported_at: new Date().toISOString(), tables };
   if (withImages) {
     const used = new Set((tables.items ?? []).map((i) => (i as unknown as { image_id: string | null }).image_id).filter(Boolean));
     const imgs = (await db.images.toArray()).filter((i) => used.has(i.id));
@@ -47,7 +47,7 @@ export class BackupError extends Error {}
 
 function validate(raw: unknown): BackupFile {
   const b = raw as BackupFile;
-  if (!b || typeof b !== 'object' || b.app !== 'libosim') throw new BackupError('Bu Libosim zaxira fayli emas');
+  if (!b || typeof b !== 'object' || b.app !== 'gsstyle') throw new BackupError('Bu G.S.Style zaxira fayli emas');
   if (b.format !== 1) throw new BackupError('Zaxira formati qo‘llab-quvvatlanmaydi');
   if (!b.tables || typeof b.tables !== 'object') throw new BackupError('Jadvallar topilmadi');
   for (const [t, rows] of Object.entries(b.tables)) {

@@ -57,7 +57,7 @@ export default function ProfilePage() {
       <AccountSection />
       <DataSection />
       <Section icon={ShieldCheck} title="Ilova haqida">
-        <p className="text-sm text-muted">Libosim · versiya {__APP_VERSION__} · ma’lumotlar va rasmlar avval telefoningizda saqlanadi.</p>
+        <p className="text-sm text-muted">G.S.Style · versiya {__APP_VERSION__} · ma’lumotlar va rasmlar avval telefoningizda saqlanadi.</p>
         <a className="mt-2 inline-block text-sm text-accent underline" href="./maxfiylik.html">Maxfiylik siyosati</a>
       </Section>
     </div>
@@ -226,7 +226,7 @@ function DataSection() {
             disabled={busy}
             onClick={async () => {
               setBusy(true);
-              downloadJson(await exportAll(withImages), `libosim-zaxira-${new Date().toISOString().slice(0, 10)}.json`);
+              downloadJson(await exportAll(withImages), `gsstyle-zaxira-${new Date().toISOString().slice(0, 10)}.json`);
               setBusy(false);
               toast.ok('Zaxira fayli yuklandi');
             }}

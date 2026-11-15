@@ -1,5 +1,5 @@
 -- =====================================================================
--- Libosim — shaxsiy garderob. Qayta ishga tushirsa ham xato bermaydi.
+-- G.S.Style — shaxsiy garderob. Qayta ishga tushirsa ham xato bermaydi.
 -- Har jadval: user_id egasi, RLS, LWW trigger (updated_at), server_updated_at kursori.
 -- Rasmlar: private "wardrobe" bucket, yo'l = <user_id>/<rasm>.webp
 -- =====================================================================

@@ -114,7 +114,7 @@ export function Logo() {
           <path d="M12 5a2 2 0 1 1 2 2c-.8 0-2 .6-2 1.6V9l8 5.2c.9.6.5 1.8-.6 1.8H4.6c-1.1 0-1.5-1.2-.6-1.8L12 9" />
         </svg>
       </span>
-      <span className="text-[17px] font-semibold tracking-tight">Libosim</span>
+      <span className="text-[17px] font-semibold tracking-tight">G.S.Style</span>
     </span>
   );
 }

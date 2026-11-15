@@ -13,8 +13,8 @@ export default defineConfig({
       registerType: 'prompt',
       includeAssets: ['favicon.svg', 'icons/*.png'],
       manifest: {
-        name: 'Libosim — shaxsiy garderob',
-        short_name: 'Libosim',
+        name: 'G.S.Style — shaxsiy garderob',
+        short_name: 'G.S.Style',
         description: "Kiyimlaringiz, obrazlaringiz va kunlik tavsiyalar bir joyda",
         lang: 'uz',
         dir: 'ltr',

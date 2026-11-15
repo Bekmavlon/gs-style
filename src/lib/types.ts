@@ -1,4 +1,4 @@
-// ===== Libosim — ma'lumot modeli =====
+// ===== G.S.Style — ma'lumot modeli =====
 
 export interface BaseRecord {
   id: string;

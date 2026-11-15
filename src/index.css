@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ===== Libosim dizayn tokenlari ===== */
+/* ===== G.S.Style dizayn tokenlari ===== */
 :root {
   --bg: 246 244 240;      /* zig'ir */
   --surface: 255 255 255;

@@ -119,7 +119,7 @@ await step('Profil: zaxira (rasmlar bilan) va qorong‘i tema', async () => {
   await c.send('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: '/tmp/lb-dl' });
   await click('Yuklab olish');
   await sleep(1500);
-  const f = readdirSync('/tmp/lb-dl').find((x) => x.startsWith('libosim-zaxira'));
+  const f = readdirSync('/tmp/lb-dl').find((x) => x.startsWith('gsstyle-zaxira'));
   const data = JSON.parse(readFileSync('/tmp/lb-dl/' + f, 'utf8'));
   if (data.tables.items.length !== 5 || data.images.length !== 5) throw new Error(`zaxira: ${data.tables.items.length} kiyim, ${data.images?.length} rasm`);
   await click('Qorong‘i');
