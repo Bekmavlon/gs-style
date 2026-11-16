@@ -10,6 +10,9 @@ import type { ClothingItem } from './types';
 
 export type AiMode = 'chat' | 'rate' | 'shop';
 
+/** Supabase Edge Function nomi */
+export const AI_FUNCTION = 'Ai';
+
 export interface AiOutfit {
   title: string;
   items: string[]; // kiyim id'lari
@@ -150,7 +153,9 @@ export async function callAi<T>(mode: AiMode, ctx: AiContext, extra: { messages?
     if (!sb) throw new AiError('setup', 'AI ishlashi uchun avval hisobni ulang (Profil → Hisob).');
     const { data: s } = await sb.auth.getSession();
     if (!s.session) throw new AiError('auth', 'AI stilistdan foydalanish uchun hisobga kiring.');
-    const { data, error } = await sb.functions.invoke('ai', { body });
+    // Funksiya serverda "Ai" nomi bilan joylangan; topilmasa "ai" ham sinab ko'riladi
+    let { data, error } = await sb.functions.invoke(AI_FUNCTION, { body });
+    if (error && (error as { context?: Response }).context?.status === 404) ({ data, error } = await sb.functions.invoke(AI_FUNCTION.toLowerCase(), { body }));
     if (error) {
       const resp = (error as { context?: Response }).context;
       let j: { error?: string; message?: string; quota?: { used: number; limit: number } } | null = null;
