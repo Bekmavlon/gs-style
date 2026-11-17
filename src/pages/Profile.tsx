@@ -112,17 +112,35 @@ function AccountSection() {
 
   const auth = async () => {
     if (!sb) return;
-    if (!/^\S+@\S+\.\S+$/.test(email)) return toast.error('Email noto‘g‘ri');
+    // Telefon klaviaturasi qo'shgan bo'sh joy va katta harflarni tozalaymiz
+    const em = email.trim().replace(/\s+/g, '').toLowerCase();
+    if (em !== email) setEmail(em);
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) return toast.error('Email noto‘g‘ri: masalan, ism@gmail.com');
     if (pw.length < 8) return toast.error('Parol kamida 8 belgi bo‘lsin');
     setBusy(true);
     try {
-      const { error } = mode === 'in' ? await sb.auth.signInWithPassword({ email, password: pw }) : await sb.auth.signUp({ email, password: pw });
-      if (error) throw error;
-      toast.ok(mode === 'in' ? 'Hisobga kirildi' : 'Hisob yaratildi');
+      if (mode === 'in') {
+        const { error } = await sb.auth.signInWithPassword({ email: em, password: pw });
+        if (error) throw error;
+        toast.ok('Hisobga kirildi');
+      } else {
+        const { data, error } = await sb.auth.signUp({ email: em, password: pw });
+        if (error) throw error;
+        if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+          setMode('in');
+          throw new Error('User already registered');
+        }
+        if (!data.session) {
+          setMode('in');
+          toast.info('Hisob yaratildi. Pochtangizga kelgan tasdiqlash havolasini bosing, so‘ng “Kirish”ni bosing.');
+          return;
+        }
+        toast.ok('Hisob yaratildi');
+      }
       setPw('');
       void syncNow();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Xato');
+      toast.error(authErrorText(e));
     } finally {
       setBusy(false);
     }
@@ -157,7 +175,7 @@ function AccountSection() {
         <div className="space-y-3">
           <Segmented value={mode} onChange={setMode} options={[{ value: 'in', label: 'Kirish' }, { value: 'up', label: 'Ro‘yxatdan o‘tish' }]} />
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="block"><span className="label">Email</span><input className="input" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} /></label>
+            <label className="block"><span className="label">Email</span><input className="input" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder="ism@gmail.com" value={email} onChange={(e) => setEmail(e.target.value)} /></label>
             <label className="block"><span className="label">Parol (kamida 8 belgi)</span><input className="input" type="password" autoComplete={mode === 'in' ? 'current-password' : 'new-password'} value={pw} onChange={(e) => setPw(e.target.value)} /></label>
           </div>
           <button className="btn-primary" onClick={() => void auth()} disabled={busy}><LogIn className="h-4 w-4" /> {mode === 'in' ? 'Kirish' : 'Hisob yaratish'}</button>
@@ -269,4 +287,19 @@ function DataSection() {
       </div>
     </Section>
   );
+}
+
+/** Supabase xatolarini tushunarli o'zbekchaga o'giradi */
+export function authErrorText(e: unknown): string {
+  const m = (e instanceof Error ? e.message : String(e ?? '')).toLowerCase();
+  if (m.includes('invalid login credentials')) return 'Email yoki parol noto‘g‘ri.';
+  if (m.includes('email not confirmed')) return 'Email hali tasdiqlanmagan. Pochtangizdagi (Spam papkasini ham tekshiring) tasdiqlash havolasini bosing.';
+  if (m.includes('already registered') || m.includes('already been registered')) return 'Bu email bilan hisob allaqachon bor — “Kirish” bo‘limidan kiring.';
+  if (m.includes('not authorized')) return 'Server bu manzilga tasdiqlash xati yubora olmadi. Supabase’da “Confirm email”ni o‘chirib, qayta urinib ko‘ring.';
+  if (m.includes('rate limit') || m.includes('too many')) return 'Juda ko‘p urinish. Birozdan keyin (taxminan 1 soat) qayta urinib ko‘ring.';
+  if (m.includes('signups not allowed') || m.includes('signup is disabled')) return 'Yangi ro‘yxatdan o‘tish yopilgan. Mavjud hisob bilan kiring.';
+  if (m.includes('password')) return 'Parol talabga javob bermadi: kamida 8 belgi, harf va raqam aralash bo‘lsin.';
+  if (m.includes('invalid format') || m.includes('validate email')) return 'Email noto‘g‘ri yozilgan.';
+  if (m.includes('fetch') || m.includes('network')) return 'Serverga ulanib bo‘lmadi. Internetni tekshiring.';
+  return e instanceof Error && e.message ? e.message : 'Xato yuz berdi';
 }

@@ -176,3 +176,14 @@ describe('AI konteksti', async () => {
     expect(r.outfits).toEqual([{ title: 't', items: ['C', 'A'], why: '' }]);
   });
 });
+
+describe('kirish xatolari o‘zbekcha', async () => {
+  const { authErrorText } = await import('@/pages/Profile');
+  it('asosiy Supabase xatolari tarjima qilinadi', () => {
+    expect(authErrorText(new Error('Invalid login credentials'))).toBe('Email yoki parol noto‘g‘ri.');
+    expect(authErrorText(new Error('Email not confirmed'))).toContain('tasdiqlanmagan');
+    expect(authErrorText(new Error('Email address "a@b.com" cannot be used as it is not authorized'))).toContain('Confirm email');
+    expect(authErrorText(new Error('email rate limit exceeded'))).toContain('Juda ko‘p');
+    expect(authErrorText(new Error('Signups not allowed for this instance'))).toContain('yopilgan');
+  });
+});
