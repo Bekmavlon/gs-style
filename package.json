@@ -14,6 +14,8 @@
   },
   "dependencies": {
     "@capacitor-mlkit/subject-segmentation": "^8.2.2",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/browser": "^8.0.5",
     "@capacitor/filesystem": "^8.1.5",
     "@supabase/supabase-js": "^2.119.0",
     "clsx": "^2.1.1",

@@ -188,3 +188,15 @@ describe('kirish xatolari o‘zbekcha', async () => {
     expect(authErrorText(new Error('Anonymous sign-ins are disabled'))).toContain('Allow anonymous sign-ins');
   });
 });
+
+describe('Google kirishdan qaytish havolasi', async () => {
+  const { parseAuthCallback, googleErrorText } = await import('@/lib/googleAuth');
+  it('code, xato va begona havolalar', () => {
+    expect(parseAuthCallback('uz.gsstyle.app://auth-callback?code=abc-123')).toEqual({ code: 'abc-123' });
+    expect(parseAuthCallback('uz.gsstyle.app://auth-callback#error=access_denied&error_description=Identity+is+already+linked+to+another+user')).toEqual({ error: 'Identity is already linked to another user' });
+    expect(parseAuthCallback('uz.gsstyle.app://auth-callback')).toBeNull();
+    expect(parseAuthCallback('not a url')).toBeNull();
+    expect(googleErrorText('Identity is already linked to another user')).toContain('boshqa hisobga');
+    expect(googleErrorText('Manual linking is disabled')).toContain('Allow manual linking');
+  });
+});

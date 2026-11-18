@@ -22,6 +22,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- Google bilan kirishdan ilovaga qaytish: uz.gsstyle.app://auth-callback -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="uz.gsstyle.app" android:host="auth-callback" />
+            </intent-filter>
+
         </activity>
 
         <!-- Fonni olib tashlash modeli (Google Play xizmatlari orqali, qurilmaning o'zida ishlaydi) -->

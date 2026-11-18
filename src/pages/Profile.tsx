@@ -3,6 +3,7 @@ import { Cloud, Database, Download, LogIn, LogOut, Palette, RefreshCw, ShieldChe
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { authErrorText, signInGuest } from '@/lib/guest';
+import { googleErrorText, startGoogleAuth } from '@/lib/googleAuth';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { confirmDialog, Loading, NumberInput, Segmented, toast, Toggle } from '@/components/ui';
 import { ChipGroup } from '@/components/wardrobe';
@@ -111,6 +112,17 @@ function AccountSection() {
     return () => sub?.data.subscription.unsubscribe();
   }, [sb]);
 
+  const google = async (link: boolean) => {
+    setBusy(true);
+    try {
+      await startGoogleAuth(link);
+    } catch (e) {
+      toast.error(googleErrorText(e instanceof Error ? e.message : String(e)));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const auth = async () => {
     if (!sb) return;
     // Telefon klaviaturasi qo'shgan bo'sh joy va katta harflarni tozalaymiz
@@ -174,10 +186,13 @@ function AccountSection() {
         </div>
       ) : !session ? (
         <div className="space-y-3">
-          <div className="rounded-xl border border-accent/30 bg-accent/5 p-3">
-            <p className="text-sm">Email va parolsiz — bir bosishda hisob. Pochtaga xat kelmaydi.</p>
+          <div className="space-y-2 rounded-xl border border-accent/30 bg-accent/5 p-3">
+            <p className="text-sm">Google hisobingiz bilan kiring — telefon almashtirsangiz ham garderobingiz qaytadi. Xat va SMS kelmaydi.</p>
+            <button className="btn-primary w-full" disabled={busy} onClick={() => void google(false)}>
+              <GoogleG /> Google bilan kirish
+            </button>
             <button
-              className="btn-primary mt-2 w-full"
+              className="btn-outline w-full"
               disabled={busy}
               onClick={async () => {
                 setBusy(true);
@@ -208,7 +223,14 @@ function AccountSection() {
         <div className="space-y-3">
           <div className="text-sm">
             <div className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-ok" /> {session.user.is_anonymous ? 'Emailsiz hisob' : session.user.email}</div>
-            {session.user.is_anonymous && <p className="mt-1 text-xs text-warn">Bu hisobga parol yo‘q: “Chiqish”ni bossangiz yoki ilovani o‘chirsangiz, unga qayta kirib bo‘lmaydi. Vaqti-vaqti bilan pastdagi “Zaxira nusxa”ni yuklab oling.</p>}
+            {session.user.is_anonymous && (
+              <div className="mt-2 space-y-2 rounded-xl border border-warn/40 bg-warn/5 p-3">
+                <p className="text-xs">Bu hisobga parol yo‘q: ilovani o‘chirsangiz yoki telefon almashtirsangiz, unga qayta kirib bo‘lmaydi. Google hisobingizni bog‘lang — garderob o‘z joyida qoladi.</p>
+                <button className="btn-primary w-full" disabled={busy} onClick={() => void google(true)}>
+                  <GoogleG /> Google hisobini bog‘lash
+                </button>
+              </div>
+            )}
             <div className="mt-1 text-xs text-muted">
               {{ local: 'lokal', idle: 'sinxronlangan', syncing: 'sinxronlanmoqda', offline: 'oflayn', error: 'xato' }[sync.status]}
               {sync.pending ? ` · ${sync.pending} ta navbatda` : ''}
@@ -313,3 +335,14 @@ function DataSection() {
 }
 
 export { authErrorText } from '@/lib/guest';
+
+function GoogleG() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4 rounded-full bg-white p-[2px]" aria-hidden="true">
+      <path fill="#4285F4" d="M21.6 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.4a4.6 4.6 0 0 1-2 3v2.5h3.2c1.9-1.7 3-4.3 3-7.3z" />
+      <path fill="#34A853" d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.1H3.1v2.6A10 10 0 0 0 12 22z" />
+      <path fill="#FBBC05" d="M6.4 14c-.2-.6-.3-1.3-.3-2s.1-1.4.3-2V7.4H3.1a10 10 0 0 0 0 9.2L6.4 14z" />
+      <path fill="#EA4335" d="M12 6c1.5 0 2.8.5 3.8 1.5l2.9-2.9A10 10 0 0 0 3.1 7.4L6.4 10C7.2 7.7 9.4 6 12 6z" />
+    </svg>
+  );
+}
