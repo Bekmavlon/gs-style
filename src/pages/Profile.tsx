@@ -2,6 +2,7 @@ import clsx from 'clsx';
 import { Cloud, Database, Download, LogIn, LogOut, Palette, RefreshCw, ShieldCheck, Trash2, Upload, UserRound } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
+import { authErrorText, signInGuest } from '@/lib/guest';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { confirmDialog, Loading, NumberInput, Segmented, toast, Toggle } from '@/components/ui';
 import { ChipGroup } from '@/components/wardrobe';
@@ -173,19 +174,41 @@ function AccountSection() {
         </div>
       ) : !session ? (
         <div className="space-y-3">
+          <div className="rounded-xl border border-accent/30 bg-accent/5 p-3">
+            <p className="text-sm">Email va parolsiz — bir bosishda hisob. Pochtaga xat kelmaydi.</p>
+            <button
+              className="btn-primary mt-2 w-full"
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
+                try {
+                  await signInGuest();
+                  toast.ok('Hisob ochildi');
+                } catch (e) {
+                  toast.error(authErrorText(e));
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              <LogIn className="h-4 w-4" /> Emailsiz kirish
+            </button>
+          </div>
+          <div className="text-center text-xs text-muted">yoki email bilan</div>
           <Segmented value={mode} onChange={setMode} options={[{ value: 'in', label: 'Kirish' }, { value: 'up', label: 'Ro‘yxatdan o‘tish' }]} />
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block"><span className="label">Email</span><input className="input" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder="ism@gmail.com" value={email} onChange={(e) => setEmail(e.target.value)} /></label>
             <label className="block"><span className="label">Parol (kamida 8 belgi)</span><input className="input" type="password" autoComplete={mode === 'in' ? 'current-password' : 'new-password'} value={pw} onChange={(e) => setPw(e.target.value)} /></label>
           </div>
-          <button className="btn-primary" onClick={() => void auth()} disabled={busy}><LogIn className="h-4 w-4" /> {mode === 'in' ? 'Kirish' : 'Hisob yaratish'}</button>
+          <button className="btn-outline" onClick={() => void auth()} disabled={busy}><LogIn className="h-4 w-4" /> {mode === 'in' ? 'Kirish' : 'Hisob yaratish'}</button>
           <p className="text-xs text-muted">Kirganingizdan so‘ng shu qurilmadagi kiyimlar va rasmlar hisobingizga yuklanadi.</p>
           {configSource() === 'runtime' && <button className="btn-ghost text-xs" onClick={() => { saveRuntimeConfig(null); location.reload(); }}>Server ulanishini olib tashlash</button>}
         </div>
       ) : (
         <div className="space-y-3">
           <div className="text-sm">
-            <div className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-ok" /> {session.user.email}</div>
+            <div className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-ok" /> {session.user.is_anonymous ? 'Emailsiz hisob' : session.user.email}</div>
+            {session.user.is_anonymous && <p className="mt-1 text-xs text-warn">Bu hisobga parol yo‘q: “Chiqish”ni bossangiz yoki ilovani o‘chirsangiz, unga qayta kirib bo‘lmaydi. Vaqti-vaqti bilan pastdagi “Zaxira nusxa”ni yuklab oling.</p>}
             <div className="mt-1 text-xs text-muted">
               {{ local: 'lokal', idle: 'sinxronlangan', syncing: 'sinxronlanmoqda', offline: 'oflayn', error: 'xato' }[sync.status]}
               {sync.pending ? ` · ${sync.pending} ta navbatda` : ''}
@@ -199,7 +222,7 @@ function AccountSection() {
               className="btn-outline"
               onClick={async () => {
                 const n = await pendingCount();
-                if (!(await confirmDialog({ title: 'Hisobdan chiqish', message: n ? `${n} ta o‘zgarish hali yuborilmagan va yo‘qoladi. Avval “Sinxronlash”ni bosing. Baribir chiqasizmi?` : 'Shu qurilmadagi nusxa o‘chiriladi (serverda saqlanib qoladi).', confirmText: 'Chiqish', danger: n > 0 }))) return;
+                if (!(await confirmDialog({ title: 'Hisobdan chiqish', message: session.user.is_anonymous ? 'Bu emailsiz hisob: chiqqaningizdan keyin unga qayta kirib bo‘lmaydi va shu qurilmadagi garderob o‘chiriladi. Avval zaxira nusxani yuklab oling. Baribir chiqasizmi?' : n ? `${n} ta o‘zgarish hali yuborilmagan va yo‘qoladi. Avval “Sinxronlash”ni bosing. Baribir chiqasizmi?` : 'Shu qurilmadagi nusxa o‘chiriladi (serverda saqlanib qoladi).', confirmText: 'Chiqish', danger: n > 0 || !!session.user.is_anonymous }))) return;
                 await signOutAndWipe();
                 location.reload();
               }}
@@ -289,17 +312,4 @@ function DataSection() {
   );
 }
 
-/** Supabase xatolarini tushunarli o'zbekchaga o'giradi */
-export function authErrorText(e: unknown): string {
-  const m = (e instanceof Error ? e.message : String(e ?? '')).toLowerCase();
-  if (m.includes('invalid login credentials')) return 'Email yoki parol noto‘g‘ri.';
-  if (m.includes('email not confirmed')) return 'Email hali tasdiqlanmagan. Pochtangizdagi (Spam papkasini ham tekshiring) tasdiqlash havolasini bosing.';
-  if (m.includes('already registered') || m.includes('already been registered')) return 'Bu email bilan hisob allaqachon bor — “Kirish” bo‘limidan kiring.';
-  if (m.includes('not authorized')) return 'Server bu manzilga tasdiqlash xati yubora olmadi. Supabase’da “Confirm email”ni o‘chirib, qayta urinib ko‘ring.';
-  if (m.includes('rate limit') || m.includes('too many')) return 'Juda ko‘p urinish. Birozdan keyin (taxminan 1 soat) qayta urinib ko‘ring.';
-  if (m.includes('signups not allowed') || m.includes('signup is disabled')) return 'Yangi ro‘yxatdan o‘tish yopilgan. Mavjud hisob bilan kiring.';
-  if (m.includes('password')) return 'Parol talabga javob bermadi: kamida 8 belgi, harf va raqam aralash bo‘lsin.';
-  if (m.includes('invalid format') || m.includes('validate email')) return 'Email noto‘g‘ri yozilgan.';
-  if (m.includes('fetch') || m.includes('network')) return 'Serverga ulanib bo‘lmadi. Internetni tekshiring.';
-  return e instanceof Error && e.message ? e.message : 'Xato yuz berdi';
-}
+export { authErrorText } from '@/lib/guest';

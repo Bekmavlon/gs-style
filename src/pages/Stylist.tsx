@@ -11,6 +11,7 @@ import { useToday, useWardrobe, type Wardrobe } from '@/lib/data';
 import { getMeta, setMeta } from '@/lib/db';
 import { uuid } from '@/lib/ids';
 import { getForecast } from '@/lib/weather';
+import { authErrorText, signInGuest } from '@/lib/guest';
 import { cityById } from '@/lib/catalog';
 import type { Category } from '@/lib/types';
 
@@ -65,7 +66,7 @@ export default function StylistPage() {
       {!consent ? (
         <ConsentCard />
       ) : ready !== 'ok' ? (
-        <AccountCard kind={ready} />
+        <AccountCard kind={ready} onReady={() => setReady('ok')} />
       ) : (
         <>
           <Segmented<Tab>
@@ -129,16 +130,39 @@ function ConsentCard() {
   );
 }
 
-function AccountCard({ kind }: { kind: 'setup' | 'auth' | null }) {
+function AccountCard({ kind, onReady }: { kind: 'setup' | 'auth' | null; onReady: () => void }) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
   return (
     <div className="card space-y-3 text-center">
       <Lock className="mx-auto h-7 w-7 text-muted" />
-      <div className="font-semibold">Hisobga kiring</div>
+      <div className="font-semibold">Hisob kerak</div>
       <p className="text-sm text-muted">
-        {kind === 'setup' ? 'AI stilist server orqali ishlaydi — avval Profil bo‘limida hisobni ulang.' : 'AI stilistdan foydalanish uchun hisobingizga kiring. Bu har bir foydalanuvchining kunlik limitini to‘g‘ri hisoblash uchun kerak.'}
+        {kind === 'setup' ? 'AI stilist server orqali ishlaydi — avval Profil bo‘limida serverni ulang.' : 'AI stilist kunlik limitni hisoblash uchun hisob talab qiladi. Email va parol shart emas — bir bosishda ochiladi.'}
       </p>
-      <Link to="/profil#hisob" className="btn-primary w-full">
-        Profil → Hisob
+      {kind === 'auth' && (
+        <button
+          className="btn-primary w-full"
+          disabled={busy}
+          onClick={async () => {
+            setBusy(true);
+            setErr(null);
+            try {
+              await signInGuest();
+              onReady();
+            } catch (e) {
+              setErr(authErrorText(e));
+            } finally {
+              setBusy(false);
+            }
+          }}
+        >
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />} Emailsiz davom etish
+        </button>
+      )}
+      {err && <p className="rounded-xl bg-bad/10 p-2 text-left text-xs text-bad">{err}</p>}
+      <Link to="/profil#hisob" className="btn-ghost w-full text-sm">
+        Email bilan kirish (Profil → Hisob)
       </Link>
     </div>
   );

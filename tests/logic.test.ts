@@ -185,5 +185,6 @@ describe('kirish xatolari o‘zbekcha', async () => {
     expect(authErrorText(new Error('Email address "a@b.com" cannot be used as it is not authorized'))).toContain('Confirm email');
     expect(authErrorText(new Error('email rate limit exceeded'))).toContain('Juda ko‘p');
     expect(authErrorText(new Error('Signups not allowed for this instance'))).toContain('yopilgan');
+    expect(authErrorText(new Error('Anonymous sign-ins are disabled'))).toContain('Allow anonymous sign-ins');
   });
 });
