@@ -2,6 +2,17 @@
 import { getSupabase } from './supabase';
 import { syncNow } from './sync';
 
+/** Emailsiz hisobni doimiy qilish: email va parol qo'shiladi, user_id (garderob) o'zgarmaydi. */
+export async function upgradeGuest(email: string, password: string): Promise<void> {
+  const sb = getSupabase();
+  if (!sb) throw new Error('Server ulanmagan');
+  const r1 = await sb.auth.updateUser({ email });
+  if (r1.error) throw r1.error;
+  const r2 = await sb.auth.updateUser({ password });
+  if (r2.error) throw r2.error;
+  void syncNow();
+}
+
 /** Email va parolsiz hisob: Supabase anonim foydalanuvchi yaratadi (xat yuborilmaydi). */
 export async function signInGuest(): Promise<void> {
   const sb = getSupabase();

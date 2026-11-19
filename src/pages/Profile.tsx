@@ -2,8 +2,7 @@ import clsx from 'clsx';
 import { Cloud, Database, Download, LogIn, LogOut, Palette, RefreshCw, ShieldCheck, Trash2, Upload, UserRound } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { authErrorText, signInGuest } from '@/lib/guest';
-import { googleErrorText, startGoogleAuth } from '@/lib/googleAuth';
+import { authErrorText, upgradeGuest } from '@/lib/guest';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { confirmDialog, Loading, NumberInput, Segmented, toast, Toggle } from '@/components/ui';
 import { ChipGroup } from '@/components/wardrobe';
@@ -112,12 +111,18 @@ function AccountSection() {
     return () => sub?.data.subscription.unsubscribe();
   }, [sb]);
 
-  const google = async (link: boolean) => {
+  const upgrade = async () => {
+    const em = email.trim().replace(/\s+/g, '').toLowerCase();
+    if (em !== email) setEmail(em);
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) return toast.error('Email noto‘g‘ri: masalan, ism@gmail.com');
+    if (pw.length < 8) return toast.error('Parol kamida 8 belgi bo‘lsin');
     setBusy(true);
     try {
-      await startGoogleAuth(link);
+      await upgradeGuest(em, pw);
+      setPw('');
+      toast.ok('Saqlandi. Endi shu email va parol bilan istalgan telefondan kira olasiz.');
     } catch (e) {
-      toast.error(googleErrorText(e instanceof Error ? e.message : String(e)));
+      toast.error(authErrorText(e));
     } finally {
       setBusy(false);
     }
@@ -186,37 +191,13 @@ function AccountSection() {
         </div>
       ) : !session ? (
         <div className="space-y-3">
-          <div className="space-y-2 rounded-xl border border-accent/30 bg-accent/5 p-3">
-            <p className="text-sm">Google hisobingiz bilan kiring — telefon almashtirsangiz ham garderobingiz qaytadi. Xat va SMS kelmaydi.</p>
-            <button className="btn-primary w-full" disabled={busy} onClick={() => void google(false)}>
-              <GoogleG /> Google bilan kirish
-            </button>
-            <button
-              className="btn-outline w-full"
-              disabled={busy}
-              onClick={async () => {
-                setBusy(true);
-                try {
-                  await signInGuest();
-                  toast.ok('Hisob ochildi');
-                } catch (e) {
-                  toast.error(authErrorText(e));
-                } finally {
-                  setBusy(false);
-                }
-              }}
-            >
-              <LogIn className="h-4 w-4" /> Emailsiz kirish
-            </button>
-          </div>
-          <div className="text-center text-xs text-muted">yoki email bilan</div>
           <Segmented value={mode} onChange={setMode} options={[{ value: 'in', label: 'Kirish' }, { value: 'up', label: 'Ro‘yxatdan o‘tish' }]} />
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block"><span className="label">Email</span><input className="input" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder="ism@gmail.com" value={email} onChange={(e) => setEmail(e.target.value)} /></label>
             <label className="block"><span className="label">Parol (kamida 8 belgi)</span><input className="input" type="password" autoComplete={mode === 'in' ? 'current-password' : 'new-password'} value={pw} onChange={(e) => setPw(e.target.value)} /></label>
           </div>
-          <button className="btn-outline" onClick={() => void auth()} disabled={busy}><LogIn className="h-4 w-4" /> {mode === 'in' ? 'Kirish' : 'Hisob yaratish'}</button>
-          <p className="text-xs text-muted">Kirganingizdan so‘ng shu qurilmadagi kiyimlar va rasmlar hisobingizga yuklanadi.</p>
+          <button className="btn-primary" onClick={() => void auth()} disabled={busy}><LogIn className="h-4 w-4" /> {mode === 'in' ? 'Kirish' : 'Hisob yaratish'}</button>
+          <p className="text-xs text-muted">Kirganingizdan so‘ng shu qurilmadagi kiyimlar va rasmlar hisobingizga yuklanadi. Parolni yozib qo‘ying — uni tiklash uchun xat yuborilmaydi.</p>
           {configSource() === 'runtime' && <button className="btn-ghost text-xs" onClick={() => { saveRuntimeConfig(null); location.reload(); }}>Server ulanishini olib tashlash</button>}
         </div>
       ) : (
@@ -225,9 +206,11 @@ function AccountSection() {
             <div className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-ok" /> {session.user.is_anonymous ? 'Emailsiz hisob' : session.user.email}</div>
             {session.user.is_anonymous && (
               <div className="mt-2 space-y-2 rounded-xl border border-warn/40 bg-warn/5 p-3">
-                <p className="text-xs">Bu hisobga parol yo‘q: ilovani o‘chirsangiz yoki telefon almashtirsangiz, unga qayta kirib bo‘lmaydi. Google hisobingizni bog‘lang — garderob o‘z joyida qoladi.</p>
-                <button className="btn-primary w-full" disabled={busy} onClick={() => void google(true)}>
-                  <GoogleG /> Google hisobini bog‘lash
+                <p className="text-xs">Bu hisobga parol yo‘q: ilovani o‘chirsangiz yoki telefon almashtirsangiz, unga qayta kirib bo‘lmaydi. Email va parol qo‘shing — garderob o‘z joyida qoladi.</p>
+                <input className="input" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder="ism@gmail.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+                <input className="input" type="password" autoComplete="new-password" placeholder="Parol (kamida 8 belgi)" value={pw} onChange={(e) => setPw(e.target.value)} />
+                <button className="btn-primary w-full" disabled={busy} onClick={() => void upgrade()}>
+                  <ShieldCheck className="h-4 w-4" /> Email va parolni saqlash
                 </button>
               </div>
             )}
@@ -335,14 +318,3 @@ function DataSection() {
 }
 
 export { authErrorText } from '@/lib/guest';
-
-function GoogleG() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4 rounded-full bg-white p-[2px]" aria-hidden="true">
-      <path fill="#4285F4" d="M21.6 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.4a4.6 4.6 0 0 1-2 3v2.5h3.2c1.9-1.7 3-4.3 3-7.3z" />
-      <path fill="#34A853" d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.1H3.1v2.6A10 10 0 0 0 12 22z" />
-      <path fill="#FBBC05" d="M6.4 14c-.2-.6-.3-1.3-.3-2s.1-1.4.3-2V7.4H3.1a10 10 0 0 0 0 9.2L6.4 14z" />
-      <path fill="#EA4335" d="M12 6c1.5 0 2.8.5 3.8 1.5l2.9-2.9A10 10 0 0 0 3.1 7.4L6.4 10C7.2 7.7 9.4 6 12 6z" />
-    </svg>
-  );
-}

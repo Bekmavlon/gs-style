@@ -4,8 +4,6 @@ import { AppShell } from '@/components/AppShell';
 import { ConfirmHost, Loading, ToastHost } from '@/components/ui';
 import { useSettings } from '@/lib/data';
 import { startAutoSync } from '@/lib/sync';
-import { listenAuthRedirects } from '@/lib/googleAuth';
-import { toast } from '@/components/ui';
 import { ErrorBoundary } from '@/features/ErrorBoundary';
 import { isNative } from '@/lib/images';
 
@@ -41,7 +39,6 @@ function ThemeApplier() {
 export default function App() {
   useEffect(() => {
     startAutoSync();
-    listenAuthRedirects((r) => (r.ok ? toast.ok('Google hisobi ulandi') : toast.error(r.message)));
     void navigator.storage?.persist?.();
   }, []);
   return (
